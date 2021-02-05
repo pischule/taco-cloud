@@ -3,15 +3,15 @@ package pischule.tacocloud;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import pischule.tacocloud.Ingredient.Type;
 
+import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,8 +35,8 @@ public class DesignTacoController {
         );
 
         Type[] types = Ingredient.Type.values();
-        for (Type type: types) {
-                model.addAttribute(type.toString().toLowerCase(),
+        for (Type type : types) {
+            model.addAttribute(type.toString().toLowerCase(),
                     filterByType(ingredients, type));
         }
 
@@ -46,17 +46,20 @@ public class DesignTacoController {
     }
 
     @PostMapping
-    public String processDesign(Taco taco) {
-        // Save the taco design
+    public String processDesign(@Valid Taco design, Errors errors) {
+        if (errors.hasErrors()) {
+            return "design";
+        }
 
-        log.info("Processing design: " + taco);
+        // Save the taco design
+        log.info("Processing design: " + design);
 
         return "redirect:/orders/current";
     }
 
     private List<Ingredient> filterByType(List<Ingredient> ingredients, Type type) {
         return ingredients.stream()
-                .filter(x->x.getType().equals(type))
+                .filter(x -> x.getType().equals(type))
                 .collect(Collectors.toList());
     }
 }
